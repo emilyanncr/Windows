@@ -171,13 +171,21 @@ type %WINDIR%\System32\drivers\etc\hosts: view contents of hosts files
 
 **Remote System Access**
 reg add "HKLM\System\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
+
 net share \\computername
+
 tasklist /V /S computername
+
 qwinsta /SERVER:computername
-qprocess /SERVER:computername *
+
+qprocess /SERVER:computername 
+
 net use \\computername (maps IPC$ which does not show up as a drive)
+
 net use \\computername /user:DOMAINNAME\username password ○ (maps IPC$ under another username)
+
 net time \\computername (Shows the time of target computer)
+
 dir \\computername\share_or_admin_share\ (dir list a remote directory)
 
 
@@ -185,18 +193,32 @@ dir \\computername\share_or_admin_share\ (dir list a remote directory)
 **WMI**
 wmic bios
 wmic qfe
+
 wmic qfe get hotfixid (This gets patches IDs)
+
 wmic startup
+
 wmic service
+
 wmic os
+
 wmic process get caption,executablepath,commandline
+
 wmic process call create “process_name” (executes a program)
+
 wmic process where name=”process_name” call terminate (terminates program)
+
 wmic logicaldisk where drivetype=3 get name, freespace, systemname, filesystem, size, volumeserialnumber (hard drive information)
+
 wmic useraccount (usernames, sid, and various security related goodies)
+
 wmic useraccount get /ALL
+
 wmic share get /ALL (you can use ? for gets help ! )
-wmic startup list full (this can be a huge list!!!) ● wmic /node:"hostname" bios get serialnumber (this can be great for finding warranty info about target)
+
+wmic startup list full (this can be a huge list!!!) 
+
+wmic /node:"hostname" bios get serialnumber (this can be great for finding warranty info about target)
 
 **Reg Command**
 
